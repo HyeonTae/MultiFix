@@ -57,7 +57,7 @@ $ bash data_processing.sh
 Train the data with our model.
 $ bash model_training.sh
 
-However, this takes a significant time, so we provide 4 models that were trained.
+However, this takes a significant time, so we provide 2 models that were trained.
 ==> log/pth
 
 ## Evaluation
