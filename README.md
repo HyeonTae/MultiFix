@@ -26,13 +26,15 @@ Etc. (Included in "requirements.txt")
 
 ## Prerequisite
 - Use virtualenv
->$ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
-$ sudo apt install python3-pip
-$ sudo pip3 install virtualenv
-$ virtualenv -p python3 venv
-$ . venv/bin/activate
-$ # code your stuff
-$ deactivate
+```	sh
+    sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+    sudo apt install python3-pip
+    sudo pip3 install virtualenv
+    virtualenv -p python3 venv
+    . venv/bin/activate
+    # code your stuff
+    deactivate
+```
 
 ## Datasets
 Our dataset is based on the dataset provided by DeepFix.
@@ -41,7 +43,9 @@ https://www.cse.iitk.ac.in/users/karkare/prutor/prutor-deepfix-09-12-2017.zip
 ## HOW TO EXECUTE OUR MODEL?
 ## Data Processing
 Generate training data based on the DeepFix and DrRepair dataset.
-$ bash data_processing.sh
+```	sh
+    bash data_processing.sh
+```
 
 => output
  data/DeepFix_style/ids/data_train.txt
@@ -55,14 +59,18 @@ $ bash data_processing.sh
 
 ## Model training
 Train the data with our model.
-$ bash model_training.sh
+```	sh
+    bash model_training.sh
+```
 
 However, this takes a significant time, so we provide 2 models that were trained.
 ==> log/pth
 
 ## Evaluation
 You can check the repair result through the saved model.
-$ bash evaluation.sh
+```	sh
+    bash evaluation.sh
+```
 
 ## Known issues
 - If the beam size is 100, it takes a significant time.
