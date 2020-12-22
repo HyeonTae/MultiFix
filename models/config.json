@@ -1,0 +1,16 @@
+{
+    "max_len": 400,
+    "embedding_size": 32,
+    "hidden_size": 256,
+    "input_dropout_p": 0,
+    "dropout_p": 0.2,
+    "n_layers": 4,
+    "bidirectional": true,
+    "rnn_cell": "lstm",
+    "variable_lengths": true,
+    "embedding": null,
+    "update_embedding": true,
+    "use_attention": true,
+    "position_embedding": "length",
+    "pos_add" : "cat"
+}
