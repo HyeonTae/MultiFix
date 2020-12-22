@@ -47,14 +47,14 @@ Generate training data based on the DeepFix and DrRepair dataset.
     bash data_processing.sh
 ```
 
-> output
- data/DeepFix_style/ids/data_train.txt
- data/DeepFix_style/ids/data_val.txt
- data/DeepFix_style/typo/data_train.txt
- data/DeepFix_style/typo/data_val.txt
- data/DeepFix_style/ids_typo/data_train.txt
- data/DeepFix_style/ids_typo/data_val.txt
- data/DrRepair_style/data_train.txt
+> output<\br>
+ data/DeepFix_style/ids/data_train.txt<\br>
+ data/DeepFix_style/ids/data_val.txt<\br>
+ data/DeepFix_style/typo/data_train.txt<\br>
+ data/DeepFix_style/typo/data_val.txt<\br>
+ data/DeepFix_style/ids_typo/data_train.txt<\br>
+ data/DeepFix_style/ids_typo/data_val.txt<\br>
+ data/DrRepair_style/data_train.txt<\br>
  data/DrRepair_style/data_val.txt
 
 ## Model training
