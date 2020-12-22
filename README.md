@@ -1,7 +1,7 @@
 # MultiFix: Learning to Repair Multiple Errors by Optimal Alignment Learning
 
 ## Overview
-This project is a Torch implementation for our AAAI 2021 submit paper, which learning to repair multiple errors by optimal alignment learning.
+This project is a Torch implementation which learning to repair multiple errors by optimal alignment learning.
 
 ## Hardware
 The models are trained using folloing hardware:
