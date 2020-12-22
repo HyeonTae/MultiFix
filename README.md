@@ -47,7 +47,7 @@ Generate training data based on the DeepFix and DrRepair dataset.
     bash data_processing.sh
 ```
 
-=> output
+> output
  data/DeepFix_style/ids/data_train.txt
  data/DeepFix_style/ids/data_val.txt
  data/DeepFix_style/typo/data_train.txt
@@ -64,7 +64,7 @@ Train the data with our model.
 ```
 
 However, this takes a significant time, so we provide 2 models that were trained.
-==> log/pth
+> log/pth
 
 ## Evaluation
 You can check the repair result through the saved model.
