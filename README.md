@@ -26,13 +26,13 @@ Etc. (Included in "requirements.txt")
 
 ## Prerequisite
 - Use virtualenv
-$ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
-$ sudo apt install python3-pip
-$ sudo pip3 install virtualenv
-$ virtualenv -p python3 venv
-$ . venv/bin/activate
-$ # code your stuff
-$ deactivate
+>$ sudo apt-get install build-essential libssl-dev libffi-dev python-dev
+>$ sudo apt install python3-pip
+>$ sudo pip3 install virtualenv
+>$ virtualenv -p python3 venv
+>$ . venv/bin/activate
+>$ # code your stuff
+>$ deactivate
 
 ## Datasets
 Our dataset is based on the dataset provided by DeepFix.
