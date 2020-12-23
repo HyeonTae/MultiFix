@@ -50,16 +50,20 @@ mv s4/* ./
 mv s5/* ./
 rm -rf s1 s2 s3 s4 s5 reset.sh
 
-
-
+echo 'Vocab generation...'
+python data_processing/DrRepair_spoc/vocab_generator.py
+python data_processing/DrRepair_codeforce_spoc_style/vocab_generator.py
+python data_processing/DrRepair_codeforce_deepfix_style/vocab_generator.py
 
 echo 'DeepFix Data generation...'
-python data_processing/DeepFix_style/data_generator.py
-mkdir data/DeepFix_style/ids_typo
-cat data/DeepFix_style/ids/data_train.txt data/DeepFix_style/typo/data_train.txt > data/DeepFix_style/ids_typo/data_train.txt
-cat data/DeepFix_style/ids/data_val.txt data/DeepFix_style/typo/data_val.txt > data/DeepFix_style/ids_typo/data_val.txt
-shuf -o data/DeepFix_style/ids_typo/data_train.txt data/DeepFix_style/ids_typo/data_train.txt
-shuf -o data/DeepFix_style/ids_typo/data_val.txt data/DeepFix_style/ids_typo/data_val.txt
+python data_processing/DeepFix/data_generator.py
+mkdir data/DeepFix
+cat data/DeepFix/ids/data_train.txt data/DeepFix/typo/data_train.txt > data/DeepFix/data_train.txt
+cat data/DeepFix/ids/data_val.txt data/DeepFix/typo/data_val.txt > data/DeepFix/data_val.txt
+shuf -o data/DeepFix/data_train.txt data/DeepFix/data_train.txt
+shuf -o data/DeepFix/data_val.txt data/DeepFix/data_val.txt
+rm -rf data/DeepFix/ids
+rm -rf data/DeepFix/typo
 
 echo 'DrRepair Data generation...'
 python data_processing/DrRepair_deepfix/data_generator.py
