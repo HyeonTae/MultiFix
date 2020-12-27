@@ -5,7 +5,8 @@ mkdir log/pth
 export PYTHONPATH=.
 
 echo 'Model training...'
-python main/train/ids/train.py
-python main/train/typo/train.py
-python main/train/ids_typo/train.py
-python main/train/drrepair/train.py
+python main/train/deepfix/train.py
+python main/train/drrepair_codeforce_deepfix_style/train.py
+python main/train/drrepair_codeforce_spoc_style/train.py
+python main/train/drrepair_deepfix/train.py
+python main/train/drrepair_spoc/train.py
