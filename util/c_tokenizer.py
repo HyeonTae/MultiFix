@@ -56,8 +56,8 @@ class C_Tokenizer(Tokenizer):
             ('number',  r'[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'),
             ('include',  r'(?<=\#include) *<([_A-Za-z]\w*(?:\.h))?>'),
             ('op',
-             r'\(|\)|\[|\]|{|}|->|<<|>>|\*\*|\|\||&&|--|\+\+|[-+*|&%\/=]=|[-<>~!%^&*\/+=?|.,:;#]'),
-            ('name',  r'[_A-Za-z]\w*'),
+             r'\(|\)|\[|\]|{|}|->|<<|>>|\*\*|\|\||&&|--|\+\+|[-+*|&%\/=<>!]=|[-<>~!%^&*\/+=?|.,:;#]'),
+            ('name',  r'[_A-Za-z]\w*|\$[_A-Za-z]\w*'),
             ('whitespace',  r'\s+'),
             ('nl', r'\\\n?'),
             ('MISMATCH', r'.'),            # Any other character
@@ -126,6 +126,7 @@ class C_Tokenizer(Tokenizer):
         isNewLine = True
 
         ret_toks = []
+        ret_types = []
 
         # Get the iterable
         my_gen = self._tokenize_code(code)
@@ -136,8 +137,8 @@ class C_Tokenizer(Tokenizer):
             except StopIteration:
                 break
 
-            if isinstance(token, Exception):
-                return '', '', ''
+            #if isinstance(token, Exception):
+            #    return '', '', ''
 
             type_ = str(token[0])
             value = str(token[1])
@@ -183,7 +184,7 @@ class C_Tokenizer(Tokenizer):
                 isNewLine = False
 
             elif type_ == 'name':
-                if len(ret_toks) > 1 and ret_toks[-1] == '.':
+                if len(ret_toks) > 2 and ret_toks[-1] == '.' and ret_types[-2] == 'name':
                     result += '_<APIcall>_' + self._escape(value) + ' '
                     isNewLine = False
                 else:
@@ -218,6 +219,7 @@ class C_Tokenizer(Tokenizer):
 
             if type_ != 'whitespace':
                 ret_toks.append(value)
+                ret_types.append(type_)
 
         result = result[:-1]
         names = names[:-1]
