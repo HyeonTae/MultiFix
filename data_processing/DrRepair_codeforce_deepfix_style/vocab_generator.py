@@ -12,7 +12,9 @@ tokenize = C_Tokenizer().tokenize
 def remove_line_numbers(source):
     lines = source.count('~')
     for l in range(lines):
-        if l >= 10:
+        if l >= 100:
+            source = source.replace(list(str(l))[0] + " " + list(str(l))[1] + " " + list(str(l))[2] + " ~ ", "", 1)
+        elif l >= 10:
             source = source.replace(list(str(l))[0] + " " + list(str(l))[1] + " ~ ", "", 1)
         else:
             source = source.replace(str(l) + " ~ ", "", 1)

@@ -137,8 +137,8 @@ class C_Tokenizer(Tokenizer):
             except StopIteration:
                 break
 
-            #if isinstance(token, Exception):
-            #    return '', '', ''
+            if isinstance(token, Exception):
+                return '', '', ''
 
             type_ = str(token[0])
             value = str(token[1])
