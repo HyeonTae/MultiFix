@@ -57,7 +57,7 @@ class C_Tokenizer(Tokenizer):
             ('include',  r'(?<=\#include) *<([_A-Za-z]\w*(?:\.h))?>'),
             ('op',
              r'\(|\)|\[|\]|{|}|->|<<|>>|\*\*|\|\||&&|--|\+\+|[-+*|&%\/=<>!]=|[-<>~!%^&*\/+=?|.,:;#]'),
-            ('name',  r'[_A-Za-z]\w*|\$[_A-Za-z]\w*'),
+            ('name',  r'[_A-Za-z]\w*|\$+[_A-Za-z]*\w*'),
             ('whitespace',  r'\s+'),
             ('nl', r'\\\n?'),
             ('MISMATCH', r'.'),            # Any other character
