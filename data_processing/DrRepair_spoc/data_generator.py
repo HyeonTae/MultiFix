@@ -25,7 +25,9 @@ class FixIDNotFoundInSource(Exception):
 def remove_line_numbers(source):
     lines = source.count('~')
     for l in range(lines):
-        if l >= 10:
+        if l >= 100:
+            source = source.replace(list(str(l))[0] + " " + list(str(l))[1] + " " + list(str(l))[2] + " ~ ", "", 1)
+        elif l >= 10:
             source = source.replace(list(str(l))[0] + " " + list(str(l))[1] + " ~ ", "", 1)
         else:
             source = source.replace(str(l) + " ~ ", "", 1)
@@ -96,13 +98,13 @@ def generate_training_data(validation_users):
                 elif len(mod_code) == len(temp[mod_line])+1:
                     temp[mod_line] = mod_code
 
-            corrupt_program, _, _ = tokenize("\n".join(temp), name_dict)
-            #source sequence
             try:
-                corrupt_source = ' '.join(remove_line_numbers(corrupt_program).split())
+                corrupt_program, _, _ = tokenize("\n".join(temp), name_dict)
             except :
                 exceptions_in_mutate_call += 1
                 continue
+            #source sequence
+            corrupt_source = ' '.join(remove_line_numbers(corrupt_program).split())
             #target sequence
             try:
                 target = get_target(corrupt_source.split(), source.split())
