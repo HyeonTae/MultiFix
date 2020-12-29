@@ -50,10 +50,10 @@ mv s4/* ./
 mv s5/* ./
 rm -rf s1 s2 s3 s4 s5 reset.sh
 
-echo 'Vocab generation...'
-python data_processing/DrRepair_spoc/vocab_generator.py
-python data_processing/DrRepair_codeforce_spoc_style/vocab_generator.py
-python data_processing/DrRepair_codeforce_deepfix_style/vocab_generator.py
+#echo 'Vocab generation...'
+#python data_processing/DrRepair_spoc/vocab_generator.py
+#python data_processing/DrRepair_codeforce_spoc_style/vocab_generator.py
+#python data_processing/DrRepair_codeforce_deepfix_style/vocab_generator.py
 
 echo 'DeepFix Data generation...'
 python data_processing/DeepFix/data_generator.py
