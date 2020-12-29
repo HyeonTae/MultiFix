@@ -125,9 +125,6 @@ class C_Tokenizer(Tokenizer):
         regex = '%(d|i|f|c|s|u|g|G|e|p|llu|ll|ld|l|o|x|X)'
         isNewLine = True
 
-        ret_toks = []
-        ret_types = []
-
         # Get the iterable
         my_gen = self._tokenize_code(code)
 
@@ -138,7 +135,8 @@ class C_Tokenizer(Tokenizer):
                 break
 
             if isinstance(token, Exception):
-                return '', '', ''
+                return Exception
+                #return '', '', ''
 
             type_ = str(token[0])
             value = str(token[1])
@@ -184,21 +182,17 @@ class C_Tokenizer(Tokenizer):
                 isNewLine = False
 
             elif type_ == 'name':
-                if len(ret_toks) > 2 and ret_toks[-1] == '.' and ret_types[-2] == 'name':
-                    result += '_<APIcall>_' + self._escape(value) + ' '
-                    isNewLine = False
-                else:
-                    if keep_names:
-                        if self._escape(value) not in name_dict:
-                            name_dict[self._escape(value)] = str(
-                                len(name_dict) + 1)
+                if keep_names:
+                    if self._escape(value) not in name_dict:
+                        name_dict[self._escape(value)] = str(
+                            len(name_dict) + 1)
 
-                        name_sequence.append(self._escape(value))
-                        result += '_<id>_' + name_dict[self._escape(value)] + '@ '
-                        names += '_<id>_' + name_dict[self._escape(value)] + '@ '
-                    else:
-                        result += '_<id>_' + '@ '
-                    isNewLine = False
+                    name_sequence.append(self._escape(value))
+                    result += '_<id>_' + name_dict[self._escape(value)] + '@ '
+                    names += '_<id>_' + name_dict[self._escape(value)] + '@ '
+                else:
+                    result += '_<id>_' + '@ '
+                isNewLine = False
 
             elif type_ == 'number':
                 if keep_literals:
@@ -216,10 +210,6 @@ class C_Tokenizer(Tokenizer):
                 result += '_<' + type_ + '>_' + converted_value + ' '
 
                 isNewLine = False
-
-            if type_ != 'whitespace':
-                ret_toks.append(value)
-                ret_types.append(type_)
 
         result = result[:-1]
         names = names[:-1]
