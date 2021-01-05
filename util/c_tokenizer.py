@@ -142,8 +142,8 @@ class C_Tokenizer(Tokenizer):
             type_ = str(token[0])
             value = str(token[1])
 
-            print("type_ = {}".format(type_))
-            print("value = {}".format(value))
+            #print("type_ = {}".format(type_))
+            #print("value = {}".format(value))
 
             if value in self._keywords:
                 result += '_<keyword>_' + self._escape(value) + ' '
