@@ -172,6 +172,10 @@ class C_Tokenizer(Tokenizer):
             elif type_ == 'whitespace' or type_ == 'comment' or type_ == 'nl':
                 pass
 
+            elif type_ == 'string_continue':
+                result += '_<string_continue>_'
+                isNewLine = False
+
             elif 'string' in type_:
                 matchObj = [m.group().strip()
                             for m in re.finditer(regex, value)]
