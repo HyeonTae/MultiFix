@@ -50,7 +50,8 @@ class C_Tokenizer(Tokenizer):
             ('comment',
              r'\/\*(?:[^*]|\*(?!\/))*\*\/|\/\*([^*]|\*(?!\/))*\*?|\/\/[^\n]*'),
             ('directive', r'#\w+'),
-            ('string', r'"(?:[^"\n]|\\")*"?'),
+            ('string', r'"(?:[^"\n]|\\")*"'),
+            ('string_continue', r'"[^);"]*|[^ );]*"'),
             ('char', r"'(?:\\?[^'\n]|\\')'"),
             ('char_continue', r"'[^']*"),
             ('number',  r'[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'),
@@ -141,8 +142,8 @@ class C_Tokenizer(Tokenizer):
             type_ = str(token[0])
             value = str(token[1])
 
-            #print("type_ = {}".format(type_))
-            #print("value = {}".format(value))
+            print("type_ = {}".format(type_))
+            print("value = {}".format(value))
 
             if value in self._keywords:
                 result += '_<keyword>_' + self._escape(value) + ' '
