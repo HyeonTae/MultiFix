@@ -88,9 +88,9 @@ def generate_vocab(path, validation_users):
         tok_dict["replace"][tok_list[i]] = str(i+len(tok_list))
         tok_dict_re[str(i+len(tok_list))] = tok_list[i]
 
-    with open('data_processing/DrRepair_codeforce_deepfix_style/target_vocab.json', 'w') as f:
+    with open(os.path.join(path, 'orig_target_vocab.json'), 'w') as f:
         json.dump(tok_dict, f, indent=4)
-    with open('data_processing/DrRepair_codeforce_deepfix_style/target_vocab_reverse.json', 'w') as f:
+    with open(os.path.join(path, 'orig_target_vocab_reverse.json'), 'w') as f:
         json.dump(tok_dict_re, f, indent=4)
     print("Exceptions in mutate() call: {}".format(exceptions_in_mutate_call))
 
