@@ -60,14 +60,13 @@ def generate_vocab(path, validation_users):
             # Mutate
             for iter_i in range(len(data["errors"])):
                 temp = copy.deepcopy(code_list)
-                orig_name_dict = copy.deepcopy(name_dict)
                 for mod_line, mod_code in zip(data["errors"][iter_i]['mod_line'],
                     data["errors"][iter_i]['mod_code']):
                     temp[mod_line] = mod_code
 
                 origincode = "\n".join(temp)
                 try:
-                    corrupt_program, _, _ = tokenize("\n".join(temp), orig_name_dict)
+                    corrupt_program, _, _ = tokenize("\n".join(temp), name_dict)
                 except:
                     exceptions_in_mutate_call += 1
                     continue
