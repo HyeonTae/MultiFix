@@ -114,13 +114,12 @@ class C_Tokenizer(Tokenizer):
 
         return recompose_program(lines)
 
-    def tokenize(self, code, keep_format_specifiers=False, keep_names=True,
+    def tokenize(self, code, name_dict={}, keep_format_specifiers=False, keep_names=True,
                  keep_literals=False):
         result = '0 ~ '
 
         names = ''
         line_count = 1
-        name_dict = {}
         name_sequence = []
 
         regex = '%(d|i|f|c|s|u|g|G|e|p|llu|ll|ld|l|o|x|X)'
