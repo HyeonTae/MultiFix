@@ -173,7 +173,7 @@ class C_Tokenizer(Tokenizer):
                 pass
 
             elif type_ == 'string_continue':
-                result += '_<string_continue>_'
+                result += '_<string_continue>_' + ' '
                 isNewLine = False
 
             elif 'string' in type_:
