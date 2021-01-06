@@ -71,11 +71,7 @@ def generate_training_data(bins, validation_users):
             code_list = []
             for lines in data["lines"]:
                 code_list.append(lines["code"])
-            try:
-                tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list))
-            except:
-                exceptions_in_mutate_call += 1
-                continue
+            tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list))
             # Correct pairs
             source = ' '.join(remove_line_numbers(tokenized_code).split())
             target = ["0" for i in range(len(source.split()))]
@@ -93,18 +89,9 @@ def generate_training_data(bins, validation_users):
                 temp = copy.deepcopy(code_list)
                 for mod_line, mod_code in zip(data["errors"][iter_i]['mod_line'],
                         data["errors"][iter_i]['mod_code']):
-                    if len(mod_code) == len(temp[mod_line]):
-                        temp[mod_line] = mod_code
-                    elif len(mod_code) == len(temp[mod_line])-1:
-                        temp[mod_line] = mod_code
-                    elif len(mod_code) == len(temp[mod_line])+1:
-                        temp[mod_line] = mod_code
+                    temp[mod_line] = mod_code
 
-                try:
-                    corrupt_program, _, _ = tokenize("\n".join(temp), name_dict)
-                except:
-                    exceptions_in_mutate_call += 1
-                    continue
+                corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp), name_dict)
                 #source sequence
                 corrupt_source = ' '.join(remove_line_numbers(corrupt_program).split())
                 #target sequence
@@ -116,11 +103,11 @@ def generate_training_data(bins, validation_users):
 
                 try:
                     result[key][problem_id] += [
-                            (corrupt_source, name_dict, name_sequence,
+                            (corrupt_source, corrupt_name_dict, name_sequence,
                                 user_id, code_id+"_"+str(iter_i), target)]
                 except:
                     result[key][problem_id] = [
-                            (corrupt_source, name_dict, name_sequence,
+                            (corrupt_source, corrupt_name_dict, name_sequence,
                                 user_id, code_id+"_"+str(iter_i), target)]
 
     print("Exceptions in mutate() call: {}".format(exceptions_in_mutate_call))

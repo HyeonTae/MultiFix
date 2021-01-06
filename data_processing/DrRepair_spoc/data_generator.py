@@ -91,16 +91,11 @@ def generate_training_data(validation_users):
             temp = copy.deepcopy(code_list)
             for mod_line, mod_code in zip(data["errors"][iter_i]['mod_line'],
                 data["errors"][iter_i]['mod_code']):
-                if len(mod_code) == len(temp[mod_line]):
-                    temp[mod_line] = mod_code
-                elif len(mod_code) == len(temp[mod_line])-1:
-                    temp[mod_line] = mod_code
-                elif len(mod_code) == len(temp[mod_line])+1:
-                    temp[mod_line] = mod_code
+                temp[mod_line] = mod_code
 
             try:
-                corrupt_program, _, _ = tokenize("\n".join(temp), name_dict)
-            except :
+                corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp), name_dict)
+            except:
                 exceptions_in_mutate_call += 1
                 continue
             #source sequence
@@ -114,11 +109,11 @@ def generate_training_data(validation_users):
 
             try:
                 result[key][problem_id] += [
-                        (corrupt_source, name_dict, name_sequence,
+                        (corrupt_source, corrupt_name_dict, name_sequence,
                             user_id+"_"+str(iter_i), target)]
             except:
                 result[key][problem_id] = [
-                        (corrupt_source, name_dict, name_sequence,
+                        (corrupt_source, corrupt_name_dict, name_sequence,
                             user_id+"_"+str(iter_i), target)]
 
     print("Exceptions in mutate() call: {}".format(exceptions_in_mutate_call))
