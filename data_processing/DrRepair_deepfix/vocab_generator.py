@@ -100,4 +100,4 @@ if __name__ == '__main__':
     path = os.path.join('data_processing', 'DrRepair_deepfix')
     validation_users = np.load(os.path.join('data', 'raw_data', 'validation_users.npy')).item()
     bins = np.load(os.path.join('data', 'raw_data', 'bins.npy'))
-    generate_vocab(bins, path, validation_keys)
+    generate_vocab(bins, path, validation_users)
