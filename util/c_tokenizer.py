@@ -1,6 +1,7 @@
 import os
 import collections
 import regex as re
+import copy
 from util.helpers import get_lines, recompose_program
 from util.tokenizer import Tokenizer, UnexpectedTokenException, EmptyProgramException
 
@@ -114,9 +115,14 @@ class C_Tokenizer(Tokenizer):
 
         return recompose_program(lines)
 
-    def tokenize(self, code, name_dict={}, keep_format_specifiers=False, keep_names=True,
+    def tokenize(self, code, prev_name_dict=None, keep_format_specifiers=False, keep_names=True,
                  keep_literals=False):
         result = '0 ~ '
+
+        if prev_name_dict is None:
+            name_dict = {}
+        else:
+            name_dict = copy.deepcopy(prev_name_dict)
 
         names = ''
         line_count = 1
@@ -172,7 +178,7 @@ class C_Tokenizer(Tokenizer):
                 pass
 
             elif type_ == 'string_continue':
-                result += '_<string_continue>_' + ' '
+                result += '_<string_continue>_'  + ' '
                 isNewLine = False
 
             elif 'string' in type_:
