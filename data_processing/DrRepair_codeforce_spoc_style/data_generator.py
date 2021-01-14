@@ -16,7 +16,7 @@ import glob
 
 tokenize = C_Tokenizer().tokenize
 
-with open("data_processing/target_vocab.json", "r") as json_file:
+with open("data_processing/DrRepair_codeforce_spoc_style/target_vocab.json", "r") as json_file:
     target_vocab = json.load(json_file)
 
 class FixIDNotFoundInSource(Exception):
