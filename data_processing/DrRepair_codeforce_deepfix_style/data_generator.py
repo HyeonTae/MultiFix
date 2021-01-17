@@ -1,13 +1,11 @@
-from util.tokenizer import EmptyProgramException
-from util.helpers import get_rev_dict, make_dir_if_not_exists
 from util.helpers import apply_fix, getTrace, getEditDistance, apply_edits
-from util.helpers import tokens_to_source, compilation_errors
+from util.helpers import cpp_compilation_errors, make_dir_if_not_exists
 from util.c_tokenizer import C_Tokenizer
 import os
 import time
 import argparse
-import sqlite3
 import numpy as np
+import pandas as pd
 from functools import partial
 import json
 import copy
@@ -16,11 +14,8 @@ import glob
 
 tokenize = C_Tokenizer().tokenize
 
-with open("data_processing/DrRepair_codeforce_deepfix_style/target_vocab.json", "r") as json_file:
+with open("data_processing/target_vocab.json", "r") as json_file:
     target_vocab = json.load(json_file)
-
-class FixIDNotFoundInSource(Exception):
-    pass
 
 def remove_line_numbers(source):
     lines = source.count('~')
@@ -48,15 +43,23 @@ def get_target(corrupt_program, program):
 
     return " ".join(target)
 
-def generate_training_data(validation_users):
-    data_path = "data_processing/DrRepair_codeforce_deepfix_style/err-data-compiler--auto-corrupt--codeforce--deepfix-style/"
+def generate_training_data(path, validation_users):
+    data_path = os.path.join(path, 'err-data-compiler--auto-corrupt--codeforce--deepfix-style/')
+
+    exceptions_in_mutate_call = 0
+    check_problem_path = os.path.join(path, 'comp_result')
+    make_dir_if_not_exists(check_problem_path)
+
+    count = 0
+    _error = 0
+    large_token = 0
     result = {'train': {}, 'validation': {}}
 
     exceptions_in_mutate_call = 0
 
     for dir in tqdm(glob.glob(data_path+"*")):
         for data_file in glob.glob(dir+"/*"):
-
+            count += 1
             try:
                 data = json.loads(open(data_file).read())
             except:
@@ -66,18 +69,26 @@ def generate_training_data(validation_users):
             problem_id = data["meta"]["probid"]
             user_id = data["meta"]["subid"]
             key = 'validation' if problem_id in validation_keys else 'train'
-
                 
-            code_list = []
+            code_list = dict()
             for lines in data["lines"]:
-                code_list.append(lines["code"])
+                code_list[lines["line"]] = lines["code"]
+
+            temp_errors, _ = cpp_compilation_errors("\n".join(code_list.values()), check_problem_path)
+            if len(temp_errors) != 0:
+                _error += 1
+                continue
+
             try:
-                tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list))
+                tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list.values()))
             except:
                 exceptions_in_mutate_call += 1
                 continue
             # Correct pairs
             source = ' '.join(remove_line_numbers(tokenized_code).split())
+            if len(source.split()) > 400:
+                large_token += 1
+                continue
             target = ["0" for i in range(len(source.split()))]
             try:
                 result[key][problem_id] += [
@@ -96,12 +107,15 @@ def generate_training_data(validation_users):
                     temp[mod_line] = mod_code
 
                 try:
-                    corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp), name_dict)
+                    corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp.values()), name_dict)
                 except:
                     exceptions_in_mutate_call += 1
                     continue
                 #source sequence
                 corrupt_source = ' '.join(remove_line_numbers(corrupt_program).split())
+                if len(corrupt_source.split()) > 400:
+                    large_token += 1
+                    continue
                 #target sequence
                 try:
                     target = get_target(corrupt_source.split(), source.split())
@@ -122,14 +136,13 @@ def generate_training_data(validation_users):
     return result
 
 if __name__ == '__main__':
-
-    validation_keys = np.load(os.path.join('data_processing',
-        'DrRepair_codeforce_deepfix_style', 'validation_keys.npy'))
+    path = os.path.join('data_processing', 'DrRepair_codeforce_deepfix_style')
+    validation_keys = np.load(os.path.join(path, 'validation_keys.npy'))
 
     output_dir = os.path.join('data', 'DrRepair_codeforce_deepfix_style')
     make_dir_if_not_exists(os.path.join(output_dir))
 
-    result = generate_training_data(validation_keys)
+    result = generate_training_data(path, validation_keys)
 
     with open(output_dir+"/data_train.txt", 'w') as train:
         for k in result['train']:
