@@ -175,6 +175,68 @@ def compilation_errors(string, temp_path):
 
     return error_set, result
 
+def c_compilation_errors(string, temp_path):
+    name1 = int(time.time() * 10**6)
+    name2 = np.random.random_integers(0, 1000)
+
+    temp_path = temp_path + "/temp"
+    if not os.path.isdir(temp_path):
+        os.mkdir(temp_path)
+
+    filename = temp_path + '/tempfile_%d_%d.c' % (name1, name2)
+    out_file = temp_path + '/temp.out'
+
+    with open(filename, 'w+') as f:
+        f.write(string)
+
+    shell_string = "gcc -w -std=c99 -pedantic %s -lm -o %s" % (filename, out_file)
+
+    try:
+        result = subprocess.check_output(
+            shell_string, timeout=30, shell=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        result = e.output
+
+    os.unlink('%s' % (filename,))
+    error_set = []
+
+    for line in result.splitlines():
+        if 'error:' in line.decode("utf-8"):
+            error_set.append(line)
+
+    return error_set, result
+
+def cpp_compilation_errors(string, temp_path):
+    name1 = int(time.time() * 10**6)
+    name2 = np.random.random_integers(0, 1000)
+
+    temp_path = temp_path + "/temp"
+    if not os.path.isdir(temp_path):
+        os.mkdir(temp_path)
+
+    filename = temp_path + '/tempfile_%d_%d.cpp' % (name1, name2)
+    out_file = temp_path + '/temp.out'
+
+    with open(filename, 'w+') as f:
+        f.write(string)
+
+    shell_string = "g++ -std=c++98 %s -o %s" % (filename, out_file)
+
+    try:
+        result = subprocess.check_output(
+            shell_string, timeout=30, shell=True, stderr=subprocess.STDOUT)
+    except subprocess.CalledProcessError as e:
+        result = e.output
+
+    os.unlink('%s' % (filename,))
+    error_set = []
+
+    for line in result.splitlines():
+        if 'error:' in line.decode("utf-8"):
+            error_set.append(line)
+
+    return error_set, result
+
 
 # Input: tokenized program
 # Returns: array of lines, each line is tokenized
