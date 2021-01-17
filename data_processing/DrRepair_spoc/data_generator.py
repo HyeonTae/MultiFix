@@ -1,13 +1,12 @@
-from util.tokenizer import EmptyProgramException
-from util.helpers import get_rev_dict, make_dir_if_not_exists
 from util.helpers import apply_fix, getTrace, getEditDistance, apply_edits
-from util.helpers import tokens_to_source, compilation_errors
+from util.helpers import cpp_compilation_errors, make_dir_if_not_exists
 from util.c_tokenizer import C_Tokenizer
 import os
 import time
 import argparse
 import sqlite3
 import numpy as np
+import pandas as pd
 from functools import partial
 import json
 import copy
@@ -16,11 +15,8 @@ import glob
 
 tokenize = C_Tokenizer().tokenize
 
-with open("data_processing/DrRepair_spoc/target_vocab.json", "r") as json_file:
+with open("data_processing/target_vocab.json", "r") as json_file:
     target_vocab = json.load(json_file)
-
-class FixIDNotFoundInSource(Exception):
-    pass
 
 def remove_line_numbers(source):
     lines = source.count('~')
@@ -48,13 +44,24 @@ def get_target(corrupt_program, program):
 
     return " ".join(target)
 
-def generate_training_data(validation_users):
-    data_path = "data_processing/DrRepair_spoc/err-data-compiler--orig-spoc/"
+def generate_training_data(path, validation_users):
+    data_path = os.path.join(path, 'err-data-compiler--orig-spoc/')
+    raw_data_path = os.path.join(path, 'raw_data', 'spoc-train.tsv')
+    raw_data = pd.read_csv(raw_data_path, delimiter='\t', header=0)
+
+    exceptions_in_mutate_call = 0
+    check_problem_path = os.path.join(path, 'comp_result')
+    make_dir_if_not_exists(check_problem_path)
+
+    count = 0
+    _error = 0
+    large_token = 0
     result = {'train': {}, 'validation': {}}
 
     exceptions_in_mutate_call = 0
 
     for data_file in tqdm(glob.glob(data_path+"*")):
+        count += 1
         try:
             data = json.loads(open(data_file).read())
         except:
@@ -64,18 +71,43 @@ def generate_training_data(validation_users):
         problem_id = data["meta"]["probid"]
         user_id = data["meta"]["subid"]
         key = 'validation' if problem_id in validation_keys else 'train'
+        retrieve = raw_data["subid"] == int(user_id)
+        retrieved_code = raw_data[retrieve]
+        retrieved_code = np.array(retrieved_code.loc[:, ['code', 'line']])
+        candidate = dict()
+        for i in retrieved_code:
+            if i[0][0] == '}' or i[0][-1] == '{':
+                candidate[i[1]] = i[0]
 
-            
-        code_list = []
-        for lines in data["lines"]:
-            code_list.append(lines["code"])
+        code_list = dict()
+        code_list[-3] = "#include <bits/stdc++.h>"
+        code_list[-2] = "#include <string>"
+        code_list[-1] = "using namespace std ;"
+        for i in range(len(data["lines"])):
+            if i in candidate.keys():
+                if candidate[i][0] == '}' and data["lines"][i]["code"][0] != '}':
+                    code_list[data["lines"][i]["line"] + 0.1] = '}'
+                code_list[data["lines"][i]["line"]] = data["lines"][i]["code"]
+                if candidate[i][-1] == '{' and data["lines"][i]["code"][-1] != '{':
+                    code_list[data["lines"][i]["line"] + 0.2] = '{'
+            else:
+                code_list[data["lines"][i]["line"]] = data["lines"][i]["code"]
+
+        temp_errors, _ = cpp_compilation_errors("\n".join(code_list.values()), check_problem_path)
+        if len(temp_errors) != 0:
+            _error += 1
+            continue
+
         try:
-            tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list))
+            tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list.values()))
         except:
             exceptions_in_mutate_call += 1
             continue
         # Correct pairs
         source = ' '.join(remove_line_numbers(tokenized_code).split())
+        if len(source.split()) > 400:
+            large_token += 1
+            continue
         target = ["0" for i in range(len(source.split()))]
         try:
             result[key][problem_id] += [
@@ -94,7 +126,7 @@ def generate_training_data(validation_users):
                 temp[mod_line] = mod_code
 
             try:
-                corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp), name_dict)
+                corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp.values()), name_dict)
             except:
                 exceptions_in_mutate_call += 1
                 continue
@@ -117,16 +149,18 @@ def generate_training_data(validation_users):
                             user_id+"_"+str(iter_i), target)]
 
     print("Exceptions in mutate() call: {}".format(exceptions_in_mutate_call))
+    print("Total data: {}, Error data: {}".format(count, _error))
+    print("Data with too large token size: {}".format(large_token))
     return result
 
 if __name__ == '__main__':
-
-    validation_keys = np.load(os.path.join('data_processing', 'DrRepair_spoc', 'validation_keys.npy'))
+    path = os.path.join('data_processing', 'DrRepair_spoc')
+    validation_keys = np.load(os.path.join(path, 'validation_keys.npy'))
 
     output_dir = os.path.join('data', 'DrRepair_spoc')
     make_dir_if_not_exists(os.path.join(output_dir))
 
-    result = generate_training_data(validation_keys)
+    result = generate_training_data(path, validation_keys)
 
     with open(output_dir+"/data_train.txt", 'w') as train:
         for k in result['train']:

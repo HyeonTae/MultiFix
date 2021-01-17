@@ -1,7 +1,5 @@
-from util.tokenizer import EmptyProgramException
-from util.helpers import get_rev_dict, make_dir_if_not_exists
 from util.helpers import apply_fix, getTrace, getEditDistance, apply_edits
-from util.helpers import tokens_to_source, compilation_errors
+from util.helpers import make_dir_if_not_exists
 from util.c_tokenizer import C_Tokenizer
 import os
 import time
@@ -16,16 +14,15 @@ import glob
 
 tokenize = C_Tokenizer().tokenize
 
-with open("data_processing/DrRepair_deepfix/target_vocab.json", "r") as json_file:
+with open("data_processing/target_vocab.json", "r") as json_file:
     target_vocab = json.load(json_file)
-
-class FixIDNotFoundInSource(Exception):
-    pass
 
 def remove_line_numbers(source):
     lines = source.count('~')
     for l in range(lines):
-        if l >= 10:
+        if l >= 100:
+            source = source.replace(list(str(l))[0] + " " + list(str(l))[1] + " " + list(str(l))[2] + " ~ ", "", 1)
+        elif l >= 10:
             source = source.replace(list(str(l))[0] + " " + list(str(l))[1] + " ~ ", "", 1)
         else:
             source = source.replace(str(l) + " ~ ", "", 1)
@@ -68,10 +65,14 @@ def generate_training_data(bins, validation_users):
             code_id = data["meta"]["subid"].split("-")[0]
             user_id = data["meta"]["subid"].split("-")[1]
             key = 'validation' if user_id in validation_users[problem_id] else 'train'
-            code_list = []
+            code_list = dict()
             for lines in data["lines"]:
-                code_list.append(lines["code"])
-            tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list))
+                code_list[lines["line"]] = lines["code"]
+            try:
+                tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list.values()))
+            except:
+                exceptions_in_mutate_call += 1
+                continue
             # Correct pairs
             source = ' '.join(remove_line_numbers(tokenized_code).split())
             target = ["0" for i in range(len(source.split()))]
@@ -91,7 +92,11 @@ def generate_training_data(bins, validation_users):
                         data["errors"][iter_i]['mod_code']):
                     temp[mod_line] = mod_code
 
-                corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp), name_dict)
+                try:
+                    corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp.values()), name_dict)
+                except:
+                    exceptions_in_mutate_call += 1
+                    continue
                 #source sequence
                 corrupt_source = ' '.join(remove_line_numbers(corrupt_program).split())
                 #target sequence
@@ -114,7 +119,6 @@ def generate_training_data(bins, validation_users):
     return result
 
 if __name__ == '__main__':
-
     validation_users = np.load(os.path.join('data', 'deepfix_raw_data', 'validation_users.npy')).item()
     bins = np.load(os.path.join('data', 'deepfix_raw_data', 'bins.npy'))
 
@@ -132,4 +136,4 @@ if __name__ == '__main__':
             for i in result['validation'][k]:
                 val.write("%s\t%s\n" % (i[0], i[5]))
 
-    print('\n\n--------------- all outputs written to {} ---------------\n\n'.format(output_directory))
+    print('\n\n--------------- all outputs written to {} ---------------\n\n'.format(output_dir))
