@@ -133,6 +133,8 @@ def generate_training_data(path, validation_users):
                                 user_id+"_"+str(iter_i), target)]
 
     print("Exceptions in mutate() call: {}".format(exceptions_in_mutate_call))
+    print("Total data: {}, Error data: {}".format(count, _error))
+    print("Data with too large token size: {}".format(large_token))
     return result
 
 if __name__ == '__main__':
