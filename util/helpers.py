@@ -334,6 +334,10 @@ def tokens_to_source(tokens, name_dict, clang_format=False, name_seq=None):
                 result += '"String" '
             elif type_ == 'char':
                 result += "'c' "
+            elif type_ == 'string_continue':
+                result += 'string_continue '
+            elif type_ == 'char_continue':
+                result += 'char_continue '
         except ValueError:
             if token == '~':
                 result += '\n'
