@@ -52,10 +52,11 @@ class C_Tokenizer(Tokenizer):
              r'\/\*(?:[^*]|\*(?!\/))*\*\/|\/\*([^*]|\*(?!\/))*\*?|\/\/[^\n]*'),
             ('directive', r'#\w+'),
             ('string', r'"(?:[^"\n]|\\")*"'),
-            ('string_continue', r'"\s[^\s\n=();<"]*|[^\s\n=();<"]+\s"'),
+            ('string_continue', r'"\s[^\s\n=(){}[];<>",\-\+\?\: (return)]*|[^\s\n=(){}[];<>",\-\+\?\: (return)]+\s"'),
             ('char', r"'(?:[^'\n]|\\')*'"),
-            ('char_continue', r"'\s[^\s\n=();<']*|[^\s\n=();<']+\s'"),
-            ('number',  r'[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'),
+            ('char_continue', r"'\s[^\s\n=(){}[];<>',\-\+\?\: (return)]*|[^\s\n=(){}[];<>',\-\+\?\: (return)]+\s'"),
+            #('number',  r'0[x]\w*|[0-9]*LL|[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?'),
+            ('number',  r'0[x]\w*|[0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?L*U*'),
             ('include',  r'(?<=\#include) *.*'),
             ('op',
              r'\(|\)|\[|\]|{|}|->|<<|>>|\*\*|\|\||&&|--|\+\+|[-+*|&%\/=<>!]=|[-<>~!%^&*\/+=?|.,:;#]'),
@@ -115,8 +116,8 @@ class C_Tokenizer(Tokenizer):
 
         return recompose_program(lines)
 
-    def tokenize(self, code, prev_name_dict=None, keep_format_specifiers=False, keep_names=True,
-                 keep_literals=False):
+    def tokenize(self, code, prev_name_dict=None, prev_number_dict=None, keep_format_specifiers=False, keep_names=True,
+                 keep_literals=True):
         result = '0 ~ '
 
         if prev_name_dict is None:
@@ -124,9 +125,15 @@ class C_Tokenizer(Tokenizer):
         else:
             name_dict = copy.deepcopy(prev_name_dict)
 
+        if prev_number_dict is None:
+            number_dict = {}
+        else:
+            number_dict = copy.deepcopy(prev_number_dict)
+
         names = ''
         line_count = 1
         name_sequence = []
+        number_sequence = []
 
         regex = '%(d|i|f|c|s|u|g|G|e|p|llu|ll|ld|l|o|x|X)'
         isNewLine = True
@@ -206,7 +213,12 @@ class C_Tokenizer(Tokenizer):
 
             elif type_ == 'number':
                 if keep_literals:
-                    result += '_<number>_' + self._escape(value) + '# '
+                    if self._escape(value) not in number_dict:
+                        number_dict[self._escape(value)] = str(
+                            len(number_dict) + 1)
+
+                    number_sequence.append(self._escape(value))
+                    result += '_<number>_' + number_dict[self._escape(value)] + '# '
                 else:
                     result += '_<number>_' + '# '
                 isNewLine = False
@@ -228,4 +240,4 @@ class C_Tokenizer(Tokenizer):
             idx = result.rfind('}')
             result = result[:idx + 1]
 
-        return self._sanitize_brackets(result), name_dict, name_sequence
+        return self._sanitize_brackets(result), name_dict, name_sequence, number_dict, number_sequence
