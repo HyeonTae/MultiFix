@@ -227,7 +227,7 @@ class C_Tokenizer(Tokenizer):
                 isNewLine = False
 
             else:
-                converted_value = self._escape(value).replace('~', 'TiLddE')
+                converted_value = self._escape(value)
                 result += '_<' + type_ + '>_' + converted_value + ' '
 
                 isNewLine = False
