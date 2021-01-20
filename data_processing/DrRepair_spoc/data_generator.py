@@ -98,7 +98,7 @@ def generate_training_data(path, validation_users):
         temp_errors, _ = cpp_compilation_errors("\n".join(code_list.values()), check_problem_path)
         if len(temp_errors) != 0:
             _error.append(data_file)
-            continue
+            #continue
 
         # Delete header
         del code_list[-1]
@@ -106,13 +106,13 @@ def generate_training_data(path, validation_users):
         del code_list[-3]
 
         try:
-            tokenized_code, name_dict, name_sequence = tokenize("\n".join(code_list.values()))
+            tokenized_code, name_dict, name_sequence, num_dict, num_seq = tokenize("\n".join(code_list.values()))
         except:
             exceptions_in_mutate_call.append(data_file)
             continue
 
         # Second compilation error check
-        orig_code = tokens_to_source(tokenized_code, name_dict, False)
+        orig_code = tokens_to_source(tokenized_code, name_dict, num_dict, False)
         orig_code = orig_code.replace(';', ';\n')
         orig_code = orig_code.replace('{', '{\n')
         orig_code = orig_code.replace('}', '}\n')
@@ -141,13 +141,18 @@ def generate_training_data(path, validation_users):
                     user_id, " ".join(target))]
 
         # Mutate
-        for iter_i in range(len(data["errors"])):
+        if len(data["errors"]) > 5:
+            ite = 5
+        else:
+            ite = len(data["errors"])
+
+        for iter_i in range(ite):
             temp = copy.deepcopy(code_list)
             for mod_line, mod_code in zip(data["errors"][iter_i]['mod_line'],
                 data["errors"][iter_i]['mod_code']):
                 temp[mod_line] = mod_code
             try:
-                corrupt_program, corrupt_name_dict, _ = tokenize("\n".join(temp.values()), name_dict)
+                corrupt_program, corrupt_name_dict, _, corrupt_num_dict, _ = tokenize("\n".join(temp.values()), name_dict, num_dict)
             except:
                 exceptions_in_mutate_call.append(data_file)
                 continue
