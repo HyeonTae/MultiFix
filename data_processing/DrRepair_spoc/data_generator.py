@@ -142,9 +142,9 @@ def generate_training_data(path, validation_users):
 
         # Mutate
         if len(data["errors"]) > 5:
-            ite = 5
+            ite = random.sample(range(len(data["errors"])), 5)
         else:
-            ite = len(data["errors"])
+            ite = random.sample(range(len(data["errors"])), len(data["errors"]))
 
         for iter_i in range(ite):
             temp = copy.deepcopy(code_list)
